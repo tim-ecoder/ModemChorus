@@ -7,7 +7,7 @@ using static ModemChorus.PortState;
 
 namespace ModemChorus
 {
-    enum ModemState
+    public enum ModemState
     {
         NONE,
         PORT_OPEN,
@@ -21,7 +21,7 @@ namespace ModemChorus
         ATI3,
         READY
     }
-    internal class PortState
+    public class PortState
     {
         public String ComPort;
         public int PortNumber;

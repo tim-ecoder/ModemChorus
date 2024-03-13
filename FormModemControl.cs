@@ -8,6 +8,9 @@ namespace ModemChorus
     {
         private List<String> ExcludePorts = new List<string>();
         private Dictionary<int, PortState> Ports = new Dictionary<int, PortState>();
+
+        Form1 symphonyForm;
+
         public ModemControl()
         {
             InitializeComponent();
@@ -63,7 +66,7 @@ namespace ModemChorus
         {
 
             LogText("WAIT...\r\n");
-            WellSleep(500);
+            WellSleep(750);
             LogText("SEND ATZ\r\n");
             foreach (int i in Ports.Keys)
             {
@@ -102,6 +105,7 @@ namespace ModemChorus
 
             //WellSleep(3000);
             LogText("READY.\r\n");
+
 
         }
 
@@ -336,6 +340,15 @@ namespace ModemChorus
                 }
             }
             LogText("\r\n");
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            if (symphonyForm == null || symphonyForm.IsDisposed)
+            {
+                symphonyForm = new Form1(Ports);
+                symphonyForm.Show();
+            }
         }
     }
 }
