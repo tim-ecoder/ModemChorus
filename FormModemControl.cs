@@ -4,14 +4,14 @@ using System.Windows.Forms;
 
 namespace ModemChorus
 {
-    public partial class ModemControl : Form
+    public partial class frmModemControl : Form
     {
         private List<String> ExcludePorts = new List<string>();
         private Dictionary<int, PortState> Ports = new Dictionary<int, PortState>();
 
-        Form1 symphonyForm;
+        frmSymphony symphonyForm;
 
-        public ModemControl()
+        public frmModemControl()
         {
             InitializeComponent();
 
@@ -38,9 +38,9 @@ namespace ModemChorus
                 LogText(String.Format("{0} ", portNum));
                 PortState ps = PortState.Initialize(s, LogText, UpdateStates);
 
-                ps.ItemNumber = listBox1.Items.Count;
+                ps.ItemNumber = lbPorts.Items.Count;
                 Ports.Add(ps.ItemNumber, ps);
-                listBox1.Items.Add(s);
+                lbPorts.Items.Add(s);
             }
             LogText("\r\n");
 
@@ -49,7 +49,7 @@ namespace ModemChorus
             foreach (var ps in Ports.Values)
             {
                 ps.OpenPort();
-                listBox2.Items.Add(ps.State);
+                lbMdmStatus.Items.Add(ps.State);
  
                 LogText(String.Format("{0} ", ps.PortNumber));
             }
@@ -105,8 +105,19 @@ namespace ModemChorus
 
             //WellSleep(3000);
             LogText("READY.\r\n");
+            EnableBtSymphony();
 
 
+        }
+
+        private void EnableBtSymphony()
+        {
+            if (InvokeRequired)
+            {
+                this.Invoke(new Action(EnableBtSymphony));
+                return;
+            }
+            btSymphony.Enabled = true;
         }
 
         private void WellSleep(int time)
@@ -136,7 +147,7 @@ namespace ModemChorus
         {
             if(!ps.SerialPort.IsOpen)
             {
-                textBox1.Text += "PORT " + ps.ComPort + " NOT OPEN";
+                tbConsole.Text += "PORT " + ps.ComPort + " NOT OPEN";
                 return;
             }
 
@@ -163,7 +174,7 @@ namespace ModemChorus
                 this.Invoke(new Action<string>(LogText), new object[] { str });
                 return;
             }
-            textBox1.AppendText(String.Format("{0}", str));
+            tbConsole.AppendText(String.Format("{0}", str));
         }
 
         public void UpdateStates()
@@ -177,30 +188,31 @@ namespace ModemChorus
             {
                 if (!String.IsNullOrEmpty(ps.Value.ModemName))
                 {
-                    listBox1.Items[ps.Value.ItemNumber] = String.Format("{0}: {1}", ps.Value.ComPort, ps.Value.ModemName);
+                    lbPorts.Items[ps.Value.ItemNumber] = String.Format("{0}: {1}", ps.Value.ComPort, ps.Value.ModemName);
                 }
                 if (ps.Value.State == ModemState.CONNECTED)
                 {
-                    listBox2.Items[ps.Value.ItemNumber] = ps.Value.State + " " + ps.Value.ConnectSpeed;
+                    lbMdmStatus.Items[ps.Value.ItemNumber] = ps.Value.State + " " + ps.Value.ConnectSpeed;
                 }
                 else
                 {
-                    listBox2.Items[ps.Value.ItemNumber] = ps.Value.State;
+                    lbMdmStatus.Items[ps.Value.ItemNumber] = ps.Value.State;
                 }
             }
         }
 
         private void textBox1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            textBox1.Clear();
+            tbConsole.Clear();
         }
 
 
-        private void button1_Click(object sender, EventArgs e)
+
+        private void btDialup_Click(object sender, EventArgs e)
         {
             LogText("DIALING PORTS: ");
 
-            if (listBox1.SelectedItems == null || listBox1.SelectedItems.Count == 0)
+            if (lbPorts.SelectedItems == null || lbPorts.SelectedItems.Count == 0)
             {
                 foreach (int i in Ports.Keys)
                 {
@@ -212,7 +224,7 @@ namespace ModemChorus
             }
             else
             {
-                foreach (int i in listBox1.SelectedIndices)
+                foreach (int i in lbPorts.SelectedIndices)
                 {
 
                     var ps = Ports[i];
@@ -227,7 +239,7 @@ namespace ModemChorus
         private void button2_Click(object sender, EventArgs e)
         {
             LogText("HANGUP PORTS: ");
-            if (listBox1.SelectedItems == null || listBox1.SelectedItems.Count == 0)
+            if (lbPorts.SelectedItems == null || lbPorts.SelectedItems.Count == 0)
             {
                 foreach (int i in Ports.Keys)
                 {
@@ -239,7 +251,7 @@ namespace ModemChorus
             }
             else
             {
-                foreach (int i in listBox1.SelectedIndices)
+                foreach (int i in lbPorts.SelectedIndices)
                 {
                     var ps = Ports[i];
                     LogText(String.Format("{0} ", ps.PortNumber));
@@ -253,7 +265,7 @@ namespace ModemChorus
         private void button3_Click(object sender, EventArgs e)
         {
             LogText("ATZ PORTS: ");
-            if (listBox1.SelectedItems == null || listBox1.SelectedItems.Count == 0) { 
+            if (lbPorts.SelectedItems == null || lbPorts.SelectedItems.Count == 0) { 
                 foreach (int i in Ports.Keys)
                 {
                     var ps = Ports[i];
@@ -263,7 +275,7 @@ namespace ModemChorus
                 }
             } else
             {
-                foreach (int i in listBox1.SelectedIndices)
+                foreach (int i in lbPorts.SelectedIndices)
                 {
 
                     var ps = Ports[i];
@@ -282,14 +294,14 @@ namespace ModemChorus
 
             String cmd;
             LogText("CMD PORTS: ");
-            if (String.IsNullOrEmpty(textBox2.Text))
+            if (String.IsNullOrEmpty(tbAtCmd.Text))
                 cmd = "\r";
             else
-                cmd = textBox2.Text;
+                cmd = tbAtCmd.Text;
 
             cmd = cmd.Replace("\\r", "\r").Replace("\\n", "\n");
 
-            if (listBox1.SelectedItems == null || listBox1.SelectedItems.Count == 0)
+            if (lbPorts.SelectedItems == null || lbPorts.SelectedItems.Count == 0)
             {
                 foreach (int i in Ports.Keys)
                 {
@@ -301,7 +313,7 @@ namespace ModemChorus
             }
             else
             {
-                foreach (int i in listBox1.SelectedIndices)
+                foreach (int i in lbPorts.SelectedIndices)
                 {
 
                     var ps = Ports[i];
@@ -318,7 +330,7 @@ namespace ModemChorus
         private void button4_Click(object sender, EventArgs e)
         {
             LogText("RESET PORTS: ");
-            if (listBox1.SelectedItems == null || listBox1.SelectedItems.Count == 0)
+            if (lbPorts.SelectedItems == null || lbPorts.SelectedItems.Count == 0)
             {
                 foreach (int i in Ports.Keys)
                 {
@@ -330,7 +342,7 @@ namespace ModemChorus
             }
             else
             {
-                foreach (int i in listBox1.SelectedIndices)
+                foreach (int i in lbPorts.SelectedIndices)
                 {
 
                     var ps = Ports[i];
@@ -346,7 +358,7 @@ namespace ModemChorus
         {
             if (symphonyForm == null || symphonyForm.IsDisposed)
             {
-                symphonyForm = new Form1(Ports);
+                symphonyForm = new frmSymphony(Ports);
                 symphonyForm.Show();
             }
         }

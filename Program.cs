@@ -16,7 +16,7 @@ namespace ModemChorus
 
             CALL_NUMBER = System.Configuration.ConfigurationManager.AppSettings["call-number"];
 
-            Application.Run(new ModemControl());
+            Application.Run(new frmModemControl());
         }
 
         public static String CALL_NUMBER;
